@@ -1,4 +1,4 @@
-### Graphics in Purescript
+### Graphics in !!
 
 To draw a clock in the browser, we are going to use `purescript-canvas` library.
 
