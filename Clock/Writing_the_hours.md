@@ -13,9 +13,9 @@ main = do
   stroke ctx
 ```
 
-If we keep writing all the code in the main function then it would get too big. It would be very hard to know what our program is doing as our code increases.
+If we keep writing all the code in the main function then it would get too big. It would be very hard to know what our program is doing as our code base increases.
 Here it makes sense to create a new function which when called creates our circle for us.
-This increases code re-use as in future if we ever need to draw a circle we can call this.
+This increases code re-use as whenever we need to create a circle we could just use our function.
 
 ```
 drawOuterCircle ctx = do
