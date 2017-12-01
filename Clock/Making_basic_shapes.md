@@ -1,4 +1,4 @@
-### Drawing basic shapes
+### Drawing basic SHAPES
 
 First let's import the `purescript-canvas` library in our `Main` module
 
