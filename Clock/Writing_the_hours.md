@@ -33,7 +33,7 @@ main = do
   ctx <- getContext2D canvas
   drawOuterCircle ctx
 ```
-When we are drawing various shapes it is necessary we do not mess up drawing shapes that we draw. So it is to call `beginPath` function which tells canvas to start a new path and reset the current path. Now even if we draw something else it would not affect this function as the path has been reset. `closePath` joins the current point to the start of the path. After this we call `stroke` which draw's the path we created.
+When we draw various shapes it is necessary that the shapes don't mess with each other. So if we call `beginPath` function it tells canvas to start a new path and reset the current path. `closePath` joins the current point to the start of the path. After this we call `stroke` which will draw our path.
 
 Now let's start with drawing the hours of the clock.
 
@@ -44,11 +44,19 @@ drawHours ctx clockArc = do
       hourAngleGap = (2.0 * pi) / 12.0
       radiusOffset = 0.85
       offset = tm.width
+      ...
 ```
-`drawHours` takes 2 parameters, the canvas context and our myCircle record that we used to draw the circle of the clock.
-`measureText` is a function that takes some text and returns a record which contains the width of the text after it will be drawn. This will help us with aligning our text and prevent it from skewing. `map` is a function that takes another function and a structure like `List`, `Array`, applies this function to each of the element of that structure and returns a new structure with the new computed values. `(..)` is an alias for the `range` function, this just generates an `Array` which is a list of numbers from start value to the end value we provided. So `map toNumber (-2..9)` generates numbers from -2 to 9 which are of type `Int` but we want `Number` so we call toNumber on each of the element of that `Array` using the `map` function.
+`drawHours` takes 2 parameters, the canvas `context` and our myCircle record that we used to draw the circle of the clock.
+`measureText` is a function that takes some text and returns a record which contains the width of the text.
+This offset will help us with aligning our text.
 
-`hourAngleGap` is the angle gap between each hour, `360/12` in degrees. `radiusOffset` right now helps us with how far will we draw our hours from the center, `0.85` is like `85%` of the radius.
+`map` is a function that takes another function and a structure like `List`, `Array`, applies this function to each of the element of that structure and returns a new structure with the new computed values.
+
+`(..)` is an alias for the `range` function, this just generates an `Array` which is a list of numbers from start value to the end value we provided.
+So `map toNumber (-2..9)` generates numbers from -2 to 9 which are of type `Int` but we want `Number` so we call toNumber on each of the element of that `Array` using the `map` function. Why we `map` from -2 to 9 is so that `1 PM` starts from right place.
+
+`hourAngleGap` is the angle gap between each hour, `360/12` in degrees.
+`radiusOffset` right now helps us with how far will we draw our hours from the center, `0.85` is like `85%` of the radius.
 
 Now let's add the final part to draw the hours. We have to calculate the x and y coordinates of our text and finally draw it.
 ```
@@ -67,10 +75,14 @@ drawHours ctx clockArc = do
   pure ctx
 ```
 
-`xcoords` and `ycoords` is using the `radius * cos(theta)` and `radius * sin(theta)` respectively for each of the values of the array. `clockArc.x - offset` helps us to push our hours to the left side, otherwise without it our clock hours look skewed. Here the `map` function takes an anonymous function where we do our calculations.
-Now that we have 2 different Array's of xcoordinates and ycoordinates, it would be nice to combine them into one single structure, `(x,y)`. A `Tuple` allows us to do that. `zip` is a function that takes 2 `Array`'s and for each `Array` get's one value out, turns them into a `Tuple` and keeps doing that till we reach the end of either of the `Array`'s. 
-Now we have a zipped Array, and we want to perform a function on each element of this array we could use `map` but we want to know the index of each element so that we know what to draw for each particular x y coordinate, `zipWith` is a function that helps us with this. `zipWith` takes a function and 2 `Array`'s and just like `zip` it calls our function with element from each array as it's argument. But unlike the previous `map` functions we wrote which were pure functions i.e without any side-effects, we want to perform fillText function which does perform a side-effect(drawing on the screen). To achieve this we use a variant of `zipWith` called `zipWithA`.
+`xcoords` and `ycoords` is using the `radius * cos(theta)` and `radius * sin(theta)` respectively for each of the values of the array.
+`clockArc.x - offset` helps us to push our hours to the left side, otherwise without it our clock would look skewed. Here the `map` function takes an anonymous function where we do our calculations.
 
-`(Tuple x y)` is pattern matching inside the anonymous function, which allow's us to access our x y values that were stored as a `Tuple`.
+Now that we have 2 different Array's of xcoordinates and ycoordinates, it would be nice to combine them into one single structure, `(x,y)`. A `Tuple` allows us to do that. `zip` is a function that takes 2 `Array`'s and for each `Array` get's each value and it's corresponding value from the other `Array`, turns them into a `Tuple` and keeps doing that till we reach the end of either `Array`. 
+
+Now we have a zipped Array, and we want to perform a function on each element of this array we could use `map` function but we want to know the index of each element so that we know what to draw for each particular x y coordinate.
+`zipWith` is a function that helps us with this. `zipWith` takes a function and 2 `Array`'s and like zip get's one element from each `Array` and passes it to our function. But unlike the previous `map` functions we wrote which were pure functions i.e without any `side-effects`, we want to perform `fillText` function which does perform a side-effect(drawing text on the screen). To achieve this we use a variant of `zipWith` called `zipWithA`.
+
+`(Tuple x y)` is `pattern matching` inside the anonymous function, which allow's us to access our x y values that were stored as a `Tuple`.
 
 
